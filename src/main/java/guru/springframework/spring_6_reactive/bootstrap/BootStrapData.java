@@ -1,7 +1,9 @@
 package guru.springframework.spring_6_reactive.bootstrap;
 
 import guru.springframework.spring_6_reactive.domain.Beer;
+import guru.springframework.spring_6_reactive.domain.Customer;
 import guru.springframework.spring_6_reactive.repositories.BeerRepository;
+import guru.springframework.spring_6_reactive.repositories.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +18,7 @@ import java.util.Arrays;
 public class BootStrapData implements CommandLineRunner {
 
     private final BeerRepository beerRepository;
+    private final CustomerRepository customerRepository;
 
 
     @Override
@@ -23,7 +26,11 @@ public class BootStrapData implements CommandLineRunner {
 
         loadBeerData();
         beerRepository.count()
-                .subscribe(count -> System.out.println("Count is: " + count));
+                .subscribe(count -> System.out.println("Beer count is: " + count));
+
+        loadCustomerData();
+        customerRepository.count()
+                .subscribe(count -> System.out.println("Customer count is: " + count));
     }
 
     private void loadBeerData() {
@@ -65,4 +72,32 @@ public class BootStrapData implements CommandLineRunner {
         });
 
     }
+
+
+    private void loadCustomerData() {
+        customerRepository.count().subscribe(count -> {
+            if (count == 0) {
+                Customer customer1 = Customer.builder()
+                        .customerName("Andrea Monizza")
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build();
+
+                Customer customer2 = Customer.builder()
+                        .customerName("Fede Ricco")
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build();
+
+                Customer customer3 = Customer.builder()
+                        .customerName("John Thompson")
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build();
+                customerRepository.saveAll(Arrays.asList(customer1, customer2, customer3)).subscribe();
+            }
+        });
+    }
+
+
 }
