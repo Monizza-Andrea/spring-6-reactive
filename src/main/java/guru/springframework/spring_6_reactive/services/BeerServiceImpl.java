@@ -56,7 +56,6 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public Mono<BeerDTO> patchBeer(Integer beerId, BeerDTO beerDTO) {
-        AtomicReference<BeerDTO> atomicReference = new AtomicReference<>();
 
         return beerRepository.findById(beerId).map(foundBeer -> {
                     if (StringUtils.hasText(beerDTO.getBeerName())) foundBeer.setBeerName(beerDTO.getBeerName());
