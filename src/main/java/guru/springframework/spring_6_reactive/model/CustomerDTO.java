@@ -18,7 +18,12 @@ public class CustomerDTO {
 
     private Integer id;
 
+    @NotBlank
+    @Size(min = 5, max = 255)
     private String email;
+
+    @NotBlank
+    @Size(min = 5, max = 255)
     private String customerName;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
