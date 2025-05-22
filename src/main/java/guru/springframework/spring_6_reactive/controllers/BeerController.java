@@ -4,9 +4,11 @@ package guru.springframework.spring_6_reactive.controllers;
 import guru.springframework.spring_6_reactive.model.BeerDTO;
 import guru.springframework.spring_6_reactive.services.BeerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,8 +28,13 @@ public class BeerController {
     @DeleteMapping(BEER_PATH_ID)
     Mono<ResponseEntity<Void>> deleteExistingBeer(@PathVariable("beerId") Integer beerId) {
 
-        return beerService.deleteBeer(beerId)
-                .thenReturn(ResponseEntity.noContent().build());
+        return beerService.getBeerById(beerId)
+                .switchIfEmpty(
+                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
+                )
+                .map(beerDTO -> beerService.deleteBeer(beerDTO.getId()))
+                .thenReturn(ResponseEntity
+                        .noContent().build());
     }
 
 
@@ -36,6 +43,9 @@ public class BeerController {
                                                  @Validated @RequestBody BeerDTO beerDTO) {
 
         return beerService.patchBeer(beerId, beerDTO)
+                .switchIfEmpty(Mono.error(
+                        new ResponseStatusException(HttpStatus.NOT_FOUND)
+                ))
                 .map(savedDTO -> ResponseEntity.created(UriComponentsBuilder
                                 .fromUriString("http://localhost:8080/" + BEER_PATH + "/" + savedDTO.getId())
                                 .build().toUri())
@@ -45,7 +55,9 @@ public class BeerController {
     @PutMapping(BEER_PATH_ID)
     Mono<ResponseEntity<Void>> updateExistingBeer(@PathVariable("beerId") Integer beerId,
                                                   @Validated @RequestBody BeerDTO beerDTO) {
-        return beerService.updateBeer(beerId,beerDTO)
+        return beerService.updateBeer(beerId,beerDTO).switchIfEmpty(Mono.error(
+                        new ResponseStatusException(HttpStatus.NOT_FOUND)
+                ))
                 .map(savedDTO -> ResponseEntity.noContent().build());
     }
 
@@ -61,7 +73,10 @@ public class BeerController {
 
     @GetMapping(BEER_PATH_ID)
     Mono<BeerDTO> getBeerById(@PathVariable("beerId") Integer beerId){
-        return beerService.getBeerById(beerId);
+        return beerService.getBeerById(beerId)
+                .switchIfEmpty(Mono.error(
+                        new ResponseStatusException(HttpStatus.NOT_FOUND)
+                ));
     }
 
     @GetMapping(BEER_PATH)
