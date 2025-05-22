@@ -1,6 +1,5 @@
 package guru.springframework.spring_6_reactive.controllers;
 
-import guru.springframework.spring_6_reactive.domain.Customer;
 import guru.springframework.spring_6_reactive.model.CustomerDTO;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -49,6 +47,26 @@ public class CustomerControllerTest {
                 .expectBody(CustomerDTO.class);
     }
 
+    @Test
+    void testGetCustomerByIdNotFound() {
+        webTestClient.get().uri(CustomerController.CUSTOMER_PATH_ID, 16)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+
+    @Test
+    void testSaveNewCustomerBadData() {
+        CustomerDTO testCustomer = getCustomerDto();
+        testCustomer.setEmail("");
+
+        webTestClient.post().uri(CustomerController.CUSTOMER_PATH)
+                .body(Mono.just(testCustomer), CustomerDTO.class)
+                .header("Content-Type", "application/json")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 
     @Order(3)
     @Test
@@ -61,6 +79,29 @@ public class CustomerControllerTest {
                 .expectHeader().location(BASE_PATH + CUSTOMER_PATH_ID + "/4");
     }
 
+    @Test
+    void testUpdateCustomerBadData() {
+        CustomerDTO testCustomer = getCustomerDto();
+        testCustomer.setCustomerName("");
+
+        webTestClient.put().uri(CustomerController.CUSTOMER_PATH_ID, 1)
+                .body(Mono.just(testCustomer), CustomerDTO.class)
+                .header("Content-Type", "application/json")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void testUpdateCustomerNotFound() {
+
+        webTestClient.put().uri(CustomerController.CUSTOMER_PATH_ID, 16)
+                .body(Mono.just(getCustomerDto()), CustomerDTO.class)
+                .header("Content-Type", "application/json")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
     @Order(4)
     @Test
     void testUpdateCustomer() {
@@ -69,6 +110,53 @@ public class CustomerControllerTest {
                 .header("Content-Type", "application/json")
                 .exchange()
                 .expectStatus().isNoContent();
+    }
+
+
+    @Test
+    void testPatchExistingCustomerBadData(){
+
+        CustomerDTO testCustomer = getCustomerDto();
+        testCustomer.setCustomerName("");
+
+        webTestClient.patch().uri(CustomerController.CUSTOMER_PATH_ID, 1)
+                .body(Mono.just(testCustomer), CustomerDTO.class)
+                .header("Content-Type", "application/json")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+
+    @Test
+    void testPatchExistingCustomerNotFound(){
+
+        webTestClient.patch().uri(CustomerController.CUSTOMER_PATH_ID, 16)
+                .body(Mono.just(getCustomerDto()), CustomerDTO.class)
+                .header("Content-Type", "application/json")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+    @Order(5)
+    @Test
+    void testPatchExistingCustomer(){
+
+        webTestClient.patch().uri(CustomerController.CUSTOMER_PATH_ID, 1)
+                .body(Mono.just(getCustomerDto()), CustomerDTO.class)
+                .header("Content-Type", "application/json")
+                .exchange()
+                .expectHeader().location(BASE_PATH + CUSTOMER_PATH_ID + "/1");
+    }
+
+
+
+    @Test
+    void testDeleteCustomerNotFound() {
+
+        webTestClient.delete().uri(CustomerController.CUSTOMER_PATH_ID, 16)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
 
@@ -83,7 +171,7 @@ public class CustomerControllerTest {
 
     CustomerDTO getCustomerDto() {
         return CustomerDTO.builder()
-                .customerName("Fede")
+                .customerName("Federico")
                 .email("fede@gmail.com")
                 .build();
     }
