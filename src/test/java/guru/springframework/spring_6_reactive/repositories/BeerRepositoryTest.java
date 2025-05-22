@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataR2dbcTest
 @Import({DatabaseConfig.class, BeerMapperImpl.class})
-class BeerRepositoryTest {
+public class BeerRepositoryTest {
 
     @Autowired
     BeerRepository beerRepository;
@@ -68,7 +68,7 @@ class BeerRepositoryTest {
         assertEquals(beerDTO.getBeerStyle(), beer.getBeerStyle());
     }
 
-    Beer getTestBeer(){
+    public static Beer getTestBeer(){
         return Beer.builder()
                 .beerName("Space Dust")
                 .beerStyle("IPA")
@@ -78,7 +78,7 @@ class BeerRepositoryTest {
                 .build();
     }
 
-    BeerDTO getTestBeerDTO(){
+    public static BeerDTO getTestBeerDTO(){
         return BeerDTO.builder()
                 .beerName("Space Dust")
                 .beerStyle("IPA")
