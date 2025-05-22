@@ -88,11 +88,4 @@ public class CustomerControllerTest {
                 .build();
     }
 
-//
-//    Customer getCustomer() {
-//        return Customer.builder()
-//                .customerName("Fede")
-//                .email("fede@gmail.com")
-//                .build();
-//    }
 }
